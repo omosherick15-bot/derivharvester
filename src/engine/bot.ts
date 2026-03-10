@@ -10,6 +10,7 @@ import {
   TradeRecord,
   Prediction,
   ContractType,
+  AccountInfo,
 } from './types';
 import { createDigitData, updateDigitData, extractLastDigit } from './analytics';
 import { generatePredictions } from './prediction';
@@ -20,6 +21,7 @@ type LogListener = (entry: LogEntry) => void;
 type DigitListener = (symbol: string, data: DigitData) => void;
 type TradeListener = (record: TradeRecord) => void;
 type ArmedListener = (prediction: Prediction & { asset: string; countdown: number }) => void;
+type BalanceListener = (balance: number) => void;
 
 export class TradingBot {
   private config: BotConfig;
@@ -34,6 +36,7 @@ export class TradingBot {
   private digitListeners: DigitListener[] = [];
   private tradeListeners: TradeListener[] = [];
   private armedListeners: ArmedListener[] = [];
+  private balanceListeners: BalanceListener[] = [];
   private armedTimeout: ReturnType<typeof setTimeout> | null = null;
   private stopped = false;
 
@@ -61,6 +64,8 @@ export class TradingBot {
       tradesInCurrentSymbol: 0,
       currentSymbolIndex: 0,
       shuffledSymbols: shuffled.slice(0, this.config.symbolsPerCycle),
+      account: null,
+      isTrading: false,
     };
   }
 
@@ -70,6 +75,7 @@ export class TradingBot {
   onDigit(fn: DigitListener) { this.digitListeners.push(fn); }
   onTrade(fn: TradeListener) { this.tradeListeners.push(fn); }
   onArmed(fn: ArmedListener) { this.armedListeners.push(fn); }
+  onBalance(fn: BalanceListener) { this.balanceListeners.push(fn); }
 
   private emitState() { this.stateListeners.forEach(fn => fn({ ...this.state })); }
   private emitLog(entry: LogEntry) { this.logListeners.forEach(fn => fn(entry)); }
@@ -97,8 +103,37 @@ export class TradingBot {
       this.log('SYSTEM', 'CONNECTED', 'WebSocket connected');
 
       if (this.config.apiToken) {
-        await this.ws.authorize(this.config.apiToken);
-        this.log('SYSTEM', 'AUTHORIZED', 'API token authorized');
+        const authResult = await this.ws.authorize(this.config.apiToken);
+        
+        // Extract account info
+        if (authResult.authorize) {
+          const auth = authResult.authorize;
+          const accountInfo: AccountInfo = {
+            name: auth.fullname || auth.loginid || 'Unknown',
+            loginid: auth.loginid || '',
+            currency: auth.currency || 'USD',
+            balance: parseFloat(auth.balance) || 0,
+          };
+          this.updateState({ account: accountInfo });
+          this.log('SYSTEM', 'AUTHORIZED', `Account: ${accountInfo.name} | Balance: ${accountInfo.currency} ${accountInfo.balance.toFixed(2)}`);
+        }
+
+        // Subscribe to balance updates
+        this.ws.on('balance', (data: any) => {
+          if (data.balance) {
+            const newBalance = parseFloat(data.balance.balance);
+            const currency = data.balance.currency || 'USD';
+            this.updateState({
+              account: {
+                ...this.state.account!,
+                balance: newBalance,
+                currency,
+              }
+            });
+            this.balanceListeners.forEach(fn => fn(newBalance));
+          }
+        });
+        this.ws.sendNoWait({ balance: 1, subscribe: 1 });
       }
 
       // Subscribe to all assets
@@ -138,7 +173,6 @@ export class TradingBot {
 
     const symbol = tick.symbol;
     const price = parseFloat(tick.quote);
-    const digit = extractLastDigit(price);
 
     // Update digit data
     let dd = this.digitData.get(symbol);
@@ -147,14 +181,14 @@ export class TradingBot {
     this.digitData.set(symbol, dd);
     this.emitDigit(symbol, dd);
 
-    // Check if we should evaluate for trades
-    if (this.state.status === 'MONITORING' || this.state.status === 'IN_RECOVERY') {
+    // Only evaluate if not currently in a trade
+    if (!this.state.isTrading && (this.state.status === 'MONITORING' || this.state.status === 'IN_RECOVERY')) {
       this.evaluateTradeOpportunity();
     }
   }
 
   private evaluateTradeOpportunity() {
-    if (this.stopped) return;
+    if (this.stopped || this.state.isTrading) return;
     if (this.state.status !== 'MONITORING' && this.state.status !== 'IN_RECOVERY') return;
 
     // Check stopping conditions
@@ -165,6 +199,13 @@ export class TradingBot {
     }
     if (this.state.consecutiveLosses >= this.config.maxConsecutiveLosses) {
       this.log('SYSTEM', 'CONSECUTIVE_LOSSES', `${this.state.consecutiveLosses} consecutive losses`, 'error');
+      this.stop();
+      return;
+    }
+
+    // Balance check
+    if (this.state.account && this.state.account.balance < this.config.riskThresholdBalance) {
+      this.log('SYSTEM', 'LOW_BALANCE', `Balance $${this.state.account.balance.toFixed(2)} below threshold $${this.config.riskThresholdBalance}`, 'error');
       this.stop();
       return;
     }
@@ -188,7 +229,6 @@ export class TradingBot {
     let bestPrediction = predictions[0];
     let bestAsset = currentAsset;
 
-    // Also check other cycle assets for better opportunities
     for (const asset of this.state.shuffledSymbols) {
       if (asset.symbol === currentAsset.symbol) continue;
       const ad = this.digitData.get(asset.symbol);
@@ -215,13 +255,12 @@ export class TradingBot {
   }
 
   private armTrade(prediction: Prediction, asset: AssetSymbol) {
-    this.updateState({ status: 'TRADE_ARMED' });
+    this.updateState({ status: 'TRADE_ARMED', isTrading: true });
     this.log(asset.name, 'TRADE_ARMED', 
       `${prediction.contractType} d=${prediction.digit} conf=${(prediction.confidence * 100).toFixed(1)}% EV=${prediction.expectedValue.toFixed(4)} dur=${prediction.duration}t`,
       'trade'
     );
 
-    // Emit armed event for UI countdown
     this.armedListeners.forEach(fn => fn({
       ...prediction,
       asset: asset.name,
@@ -245,12 +284,11 @@ export class TradingBot {
         }
       };
       this.ws?.on('tick', waitHandler);
-      // Timeout after 30s
       this.armedTimeout = setTimeout(() => {
         this.ws?.off('tick', waitHandler);
         if (this.state.status === 'TRADE_ARMED') {
           this.log(asset.name, 'TIMEOUT', 'DIGITDIFF wait timeout, resuming monitoring', 'warn');
-          this.updateState({ status: 'MONITORING' });
+          this.updateState({ status: 'MONITORING', isTrading: false });
         }
       }, 30000);
       return;
@@ -266,7 +304,7 @@ export class TradingBot {
 
   private async executeTrade(prediction: Prediction, asset: AssetSymbol) {
     if (this.stopped) return;
-    this.updateState({ status: 'EXECUTING' });
+    this.updateState({ status: 'EXECUTING', isTrading: true });
 
     const tradeRecord: TradeRecord = {
       id: ++this.tradeCounter,
@@ -282,8 +320,8 @@ export class TradingBot {
       timestamp: Date.now(),
     };
 
-    this.log(asset.name, 'TRADE_EXECUTED', 
-      `#${tradeRecord.id} ${prediction.contractType} barrier=${prediction.digit} stake=${this.state.currentStake.toFixed(2)} dur=${prediction.duration}t`,
+    this.log(asset.name, 'EXECUTING', 
+      `#${tradeRecord.id} ${prediction.contractType} barrier=${prediction.digit} stake=$${this.state.currentStake.toFixed(2)} dur=${prediction.duration}t`,
       'trade'
     );
 
@@ -308,7 +346,7 @@ export class TradingBot {
           tradeRecord.contractId = result.buy.contract_id;
           this.log(asset.name, 'CONTRACT_BOUGHT', `ID: ${result.buy.contract_id}`, 'info');
 
-          // Wait for settlement via proposal_open_contract
+          // Wait for settlement
           this.ws.sendNoWait({
             proposal_open_contract: 1,
             contract_id: result.buy.contract_id,
@@ -337,7 +375,7 @@ export class TradingBot {
           const won = this.simulateResult(prediction.contractType, prediction.digit, lastDigit);
           tradeRecord.result = won ? 'win' : 'loss';
           tradeRecord.profit = won ? this.state.currentStake * 0.95 : -this.state.currentStake;
-          setTimeout(() => this.processTradeResult(tradeRecord), 1500);
+          setTimeout(() => this.processTradeResult(tradeRecord), 2000);
         }
       }
     } catch (err: any) {
@@ -349,7 +387,6 @@ export class TradingBot {
   }
 
   private simulateResult(contractType: ContractType, target: number, digit: number): boolean {
-    // Use a random digit for simulation to be more realistic
     const simDigit = Math.floor(Math.random() * 10);
     switch (contractType) {
       case 'DIGITOVER': return simDigit > target;
@@ -373,7 +410,6 @@ export class TradingBot {
       let newStake = this.state.currentStake;
       let newHarvested = this.state.harvestedProfit;
 
-      // Harvest check
       if (newConsecWins >= this.config.harvestAfterWins) {
         const harvestAmount = newStake - this.config.initialStake;
         if (harvestAmount > 0) {
@@ -382,12 +418,11 @@ export class TradingBot {
         }
         newStake = this.config.initialStake;
       } else {
-        // Compound: stake grows with profit
         newStake = this.config.initialStake + Math.max(0, newProfit - newHarvested);
       }
 
-      this.log(record.asset, isWin ? 'WIN' : 'LOSS',
-        `#${record.id} P/L: $${record.profit.toFixed(2)} Total: $${newProfit.toFixed(2)}`,
+      this.log(record.asset, 'WIN',
+        `#${record.id} ${record.contractType} on ${record.asset} → WIN +$${record.profit.toFixed(2)}`,
         'success'
       );
 
@@ -401,16 +436,15 @@ export class TradingBot {
         currentStake: newStake,
         inRecovery: false,
         status: 'MONITORING',
+        isTrading: false,
       });
     } else {
-      // Loss
       this.log(record.asset, 'LOSS',
-        `#${record.id} P/L: $${record.profit.toFixed(2)} Total: $${newProfit.toFixed(2)}`,
+        `#${record.id} ${record.contractType} on ${record.asset} → LOSS -$${Math.abs(record.profit).toFixed(2)}`,
         'error'
       );
 
       if (this.state.inRecovery) {
-        // Second loss in recovery: stop
         this.updateState({
           totalTrades: this.state.totalTrades + 1,
           losses: this.state.losses + 1,
@@ -419,13 +453,13 @@ export class TradingBot {
           consecutiveLosses: this.state.consecutiveLosses + 1,
           status: 'STOPPED',
           inRecovery: false,
+          isTrading: false,
         });
         this.log('SYSTEM', 'RECOVERY_FAILED', 'Recovery trade lost. Stopping.', 'error');
         this.stopped = true;
         return;
       }
 
-      // Enter recovery
       const recoveryStake = this.state.currentStake * this.config.recoveryMultiplier;
       this.updateState({
         totalTrades: this.state.totalTrades + 1,
@@ -436,6 +470,7 @@ export class TradingBot {
         currentStake: recoveryStake,
         inRecovery: true,
         status: 'IN_RECOVERY',
+        isTrading: false,
       });
       this.log('SYSTEM', 'RECOVERY_MODE', `Stake increased to $${recoveryStake.toFixed(2)}`, 'warn');
     }

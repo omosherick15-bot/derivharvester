@@ -16,7 +16,7 @@ function Field({ label, value, onChange, type = 'number', placeholder, hint }: {
 }) {
   return (
     <div className="mb-4">
-      <label className="block font-label text-xs text-muted-foreground uppercase tracking-wider mb-1">
+      <label className="block font-label text-[10px] text-muted-foreground uppercase tracking-wider mb-1.5">
         {label}
       </label>
       <input
@@ -24,9 +24,9 @@ function Field({ label, value, onChange, type = 'number', placeholder, hint }: {
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full bg-secondary border border-border px-3 py-2 font-mono text-sm text-foreground focus:outline-none focus:border-primary transition-colors"
+        className="w-full bg-secondary border border-border rounded px-3 py-2.5 font-mono text-sm text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-all"
       />
-      {hint && <p className="mt-1 font-label text-xs text-muted-foreground">{hint}</p>}
+      {hint && <p className="mt-1 font-label text-[10px] text-muted-foreground">{hint}</p>}
     </div>
   );
 }
@@ -49,12 +49,15 @@ export function ConfigScreen({ onStart }: ConfigScreenProps) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="w-full max-w-lg border border-border p-6">
-        <h1 className="font-mono text-lg font-bold text-primary mb-1">
-          ADVANCED HARVEST TRADER
-        </h1>
-        <p className="font-label text-xs text-muted-foreground mb-6 uppercase tracking-widest">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
+      <div className="w-full max-w-lg border border-border rounded-lg p-8 bg-card shadow-2xl shadow-primary/5">
+        <div className="flex items-center gap-3 mb-1">
+          <div className="w-3 h-3 rounded-full bg-primary glow-primary" />
+          <h1 className="font-mono text-lg font-bold text-primary">
+            ADVANCED HARVEST TRADER
+          </h1>
+        </div>
+        <p className="font-label text-[10px] text-muted-foreground mb-8 uppercase tracking-widest ml-6">
           Configuration Terminal
         </p>
 
@@ -77,7 +80,7 @@ export function ConfigScreen({ onStart }: ConfigScreenProps) {
                 type="checkbox"
                 checked={autoTicks}
                 onChange={e => setAutoTicks(e.target.checked)}
-                className="accent-primary"
+                className="accent-primary w-4 h-4"
               />
               Auto-select tick duration
             </label>
@@ -90,27 +93,15 @@ export function ConfigScreen({ onStart }: ConfigScreenProps) {
               hint="1-10 ticks"
             />
           )}
-          <Field
-            label="Trades per Symbol"
-            value={config.tradesPerSymbol}
-            onChange={v => update('tradesPerSymbol', v)}
-          />
-          <Field
-            label="Symbols per Cycle"
-            value={config.symbolsPerCycle}
-            onChange={v => update('symbolsPerCycle', v)}
-          />
+          <Field label="Trades per Symbol" value={config.tradesPerSymbol} onChange={v => update('tradesPerSymbol', v)} />
+          <Field label="Symbols per Cycle" value={config.symbolsPerCycle} onChange={v => update('symbolsPerCycle', v)} />
           <Field
             label="Harvest After Wins"
             value={config.harvestAfterWins}
             onChange={v => update('harvestAfterWins', v)}
             hint="Consecutive wins to harvest"
           />
-          <Field
-            label="Max Total Trades"
-            value={config.maxTotalTrades}
-            onChange={v => update('maxTotalTrades', v)}
-          />
+          <Field label="Max Total Trades" value={config.maxTotalTrades} onChange={v => update('maxTotalTrades', v)} />
           <Field
             label="Max Consec. Losses"
             value={config.maxConsecutiveLosses}
@@ -130,7 +121,7 @@ export function ConfigScreen({ onStart }: ConfigScreenProps) {
           />
         </div>
 
-        <div className="mt-4 border-t border-border pt-4">
+        <div className="mt-6 border-t border-border pt-6">
           <Field
             label="Deriv API Token"
             value={config.apiToken}
@@ -149,7 +140,7 @@ export function ConfigScreen({ onStart }: ConfigScreenProps) {
 
         <button
           onClick={handleStart}
-          className="w-full mt-6 py-3 font-label text-sm font-bold uppercase tracking-widest bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
+          className="w-full mt-6 py-3.5 rounded font-label text-sm font-bold uppercase tracking-widest bg-primary text-primary-foreground hover:opacity-90 transition-opacity glow-primary"
         >
           ▶ Initialize System
         </button>
