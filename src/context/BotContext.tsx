@@ -49,7 +49,6 @@ export function BotProvider({ children }: { children: React.ReactNode }) {
     bot.onTrade((record) => setTrades(prev => [record, ...prev]));
     bot.onArmed((pred) => {
       setArmed(pred);
-      // Clear after 5s
       setTimeout(() => setArmed(null), 5500);
     });
 
