@@ -89,6 +89,13 @@ export interface TradeRecord {
 
 export type BotStatus = 'IDLE' | 'CONFIGURING' | 'MONITORING' | 'TRADE_ARMED' | 'EXECUTING' | 'IN_RECOVERY' | 'STOPPED';
 
+export interface AccountInfo {
+  name: string;
+  loginid: string;
+  currency: string;
+  balance: number;
+}
+
 export interface BotState {
   status: BotStatus;
   totalTrades: number;
@@ -105,6 +112,8 @@ export interface BotState {
   tradesInCurrentSymbol: number;
   currentSymbolIndex: number;
   shuffledSymbols: AssetSymbol[];
+  account: AccountInfo | null;
+  isTrading: boolean; // true when a trade is in progress
 }
 
 export interface LogEntry {
