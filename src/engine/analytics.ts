@@ -12,8 +12,10 @@ export function createDigitData(): DigitData {
 }
 
 export function extractLastDigit(price: number): number {
-  const priceStr = price.toString();
-  return parseInt(priceStr[priceStr.length - 1], 10);
+  // Multiply by 1000 to preserve three decimal places, then round
+  const scaled = Math.round(price * 1000);
+  // Get last digit of scaled number
+  return scaled % 10;
 }
 
 export function updateDigitData(data: DigitData, tick: number): DigitData {
