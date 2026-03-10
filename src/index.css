@@ -4,47 +4,50 @@
 
 @layer base {
   :root {
-    --background: 120 8% 10%;
-    --foreground: 80 8% 69%;
+    --background: 225 25% 8%;
+    --foreground: 220 15% 75%;
 
-    --card: 120 8% 12%;
-    --card-foreground: 80 8% 69%;
+    --card: 225 25% 11%;
+    --card-foreground: 220 15% 75%;
 
-    --popover: 120 8% 12%;
-    --popover-foreground: 80 8% 69%;
+    --popover: 225 25% 11%;
+    --popover-foreground: 220 15% 75%;
 
-    --primary: 43 78% 46%;
-    --primary-foreground: 120 8% 10%;
+    --primary: 168 80% 46%;
+    --primary-foreground: 225 25% 8%;
 
-    --secondary: 120 8% 16%;
-    --secondary-foreground: 80 8% 69%;
+    --secondary: 225 20% 16%;
+    --secondary-foreground: 220 15% 75%;
 
-    --muted: 120 8% 16%;
-    --muted-foreground: 80 6% 50%;
+    --muted: 225 20% 16%;
+    --muted-foreground: 220 10% 50%;
 
-    --accent: 43 78% 46%;
-    --accent-foreground: 120 8% 10%;
+    --accent: 270 60% 60%;
+    --accent-foreground: 225 25% 8%;
 
-    --destructive: 7 46% 45%;
-    --destructive-foreground: 80 8% 90%;
+    --destructive: 0 72% 55%;
+    --destructive-foreground: 0 0% 98%;
 
-    --success: 152 20% 46%;
-    --success-foreground: 120 8% 10%;
+    --success: 152 55% 50%;
+    --success-foreground: 225 25% 8%;
 
-    --border: 120 6% 20%;
-    --input: 120 6% 20%;
-    --ring: 43 78% 46%;
+    --warning: 38 92% 55%;
+    --warning-foreground: 225 25% 8%;
 
-    --radius: 0.25rem;
+    --border: 225 15% 18%;
+    --input: 225 15% 18%;
+    --ring: 168 80% 46%;
 
-    --sidebar-background: 120 8% 10%;
-    --sidebar-foreground: 80 8% 69%;
-    --sidebar-primary: 43 78% 46%;
-    --sidebar-primary-foreground: 120 8% 10%;
-    --sidebar-accent: 120 8% 16%;
-    --sidebar-accent-foreground: 80 8% 69%;
-    --sidebar-border: 120 6% 20%;
-    --sidebar-ring: 43 78% 46%;
+    --radius: 0.5rem;
+
+    --sidebar-background: 225 25% 8%;
+    --sidebar-foreground: 220 15% 75%;
+    --sidebar-primary: 168 80% 46%;
+    --sidebar-primary-foreground: 225 25% 8%;
+    --sidebar-accent: 225 20% 16%;
+    --sidebar-accent-foreground: 220 15% 75%;
+    --sidebar-border: 225 15% 18%;
+    --sidebar-ring: 168 80% 46%;
 
     --font-mono: 'IBM Plex Mono', monospace;
     --font-label: 'Source Code Pro', monospace;
@@ -66,7 +69,7 @@
 
 @keyframes pulse-screen {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.9; }
+  50% { opacity: 0.92; }
 }
 
 .trade-armed-pulse {
@@ -92,4 +95,15 @@
 }
 .log-entry {
   animation: log-enter 150ms ease-out;
+}
+
+/* Glow effects */
+.glow-primary {
+  box-shadow: 0 0 12px hsl(168 80% 46% / 0.2);
+}
+.glow-success {
+  box-shadow: 0 0 12px hsl(152 55% 50% / 0.2);
+}
+.glow-destructive {
+  box-shadow: 0 0 12px hsl(0 72% 55% / 0.2);
 }
