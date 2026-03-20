@@ -1,14 +1,11 @@
 import React from 'react';
 import { SYMBOLS_1S, SYMBOLS_STANDARD, SymbolData } from '@/lib/trading-types';
-import { useDerivLivePrices } from '@/hooks/use-deriv-live-prices';
 
 interface Props {
   symbolsData: Map<string, SymbolData>;
 }
 
 export const LivePricesPanel: React.FC<Props> = ({ symbolsData }) => {
-  const livePriceData = useDerivLivePrices(symbolsData);
-
   return (
     <div className="rounded-lg border border-border bg-card p-3 md:p-4">
       <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -21,7 +18,7 @@ export const LivePricesPanel: React.FC<Props> = ({ symbolsData }) => {
         </h3>
         <div className="grid grid-cols-2 gap-1 lg:grid-cols-4">
           {SYMBOLS_1S.map((sym) => (
-            <PriceCell key={sym.symbol} name={sym.name} data={livePriceData.get(sym.symbol)} />
+            <PriceCell key={sym.symbol} name={sym.name} data={symbolsData.get(sym.symbol)} />
           ))}
         </div>
       </div>
@@ -32,7 +29,7 @@ export const LivePricesPanel: React.FC<Props> = ({ symbolsData }) => {
         </h3>
         <div className="grid grid-cols-2 gap-1 lg:grid-cols-3">
           {SYMBOLS_STANDARD.map((sym) => (
-            <PriceCell key={sym.symbol} name={sym.name} data={livePriceData.get(sym.symbol)} />
+            <PriceCell key={sym.symbol} name={sym.name} data={symbolsData.get(sym.symbol)} />
           ))}
         </div>
       </div>
