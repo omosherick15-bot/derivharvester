@@ -98,6 +98,7 @@ export interface TradingConfig {
   ticksWindow: number;
   takeProfit: number;
   stopLoss: number;
+  under4Over5Mode: boolean;
 }
 
 export const DEFAULT_CONFIG: TradingConfig = {
