@@ -53,8 +53,11 @@ export const ControlPanel: React.FC<Props> = ({ isTrading, onStart, onStop, conf
             <button
               key={key}
               onClick={() => toggleCategory(key)}
+              disabled={config.under4Over5Mode}
               className={`px-2 py-1 rounded text-xs font-medium transition-all border ${
-                config.enabledCategories.includes(key)
+                config.under4Over5Mode
+                  ? 'bg-secondary/50 text-muted-foreground/50 border-border cursor-not-allowed'
+                  : config.enabledCategories.includes(key)
                   ? 'bg-primary text-primary-foreground border-primary'
                   : 'bg-secondary text-muted-foreground border-border hover:border-muted-foreground'
               }`}
@@ -63,9 +66,29 @@ export const ControlPanel: React.FC<Props> = ({ isTrading, onStart, onStop, conf
             </button>
           ))}
         </div>
-        {config.enabledCategories.length === 4 && (
+        {config.enabledCategories.length === 4 && !config.under4Over5Mode && (
           <span className="text-[10px] text-harvest">Auto: all options enabled</span>
         )}
+      </div>
+
+      {/* Under 4 / Over 5 Specialist Mode */}
+      <div className="space-y-1.5">
+        <label className="text-xs font-medium text-muted-foreground">Specialist Mode</label>
+        <button
+          onClick={() => onConfigChange({ ...config, under4Over5Mode: !config.under4Over5Mode })}
+          className={`w-full px-3 py-2 rounded text-xs font-bold transition-all border ${
+            config.under4Over5Mode
+              ? 'bg-active/20 text-active border-active glow-active'
+              : 'bg-secondary text-muted-foreground border-border hover:border-muted-foreground'
+          }`}
+        >
+          {config.under4Over5Mode ? '✦ Under 4 / Over 5 — ACTIVE' : '✦ Under 4 / Over 5'}
+        </button>
+        <span className="text-[10px] text-muted-foreground">
+          {config.under4Over5Mode
+            ? '6-layer algorithm: Frequency, Streaks, Markov, Entropy, Recency, Autocorrelation'
+            : 'Enable to trade only Under 4 and Over 5 with advanced 6-layer analysis'}
+        </span>
       </div>
 
       {/* Ticks Window */}

@@ -98,6 +98,7 @@ export interface TradingConfig {
   ticksWindow: number;
   takeProfit: number;
   stopLoss: number;
+  under4Over5Mode: boolean;
 }
 
 export const DEFAULT_CONFIG: TradingConfig = {
@@ -116,6 +117,7 @@ export const DEFAULT_CONFIG: TradingConfig = {
   ticksWindow: 0,
   takeProfit: 0,
   stopLoss: 0,
+  under4Over5Mode: false,
 };
 
 // Correct decimal places per Deriv symbol (from actual market data)

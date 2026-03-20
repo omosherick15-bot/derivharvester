@@ -6,6 +6,7 @@ import {
   getContractTypesForCategories,
 } from '@/lib/trading-types';
 import { createSymbolData, updateSymbolData, generatePredictions, getBarrierString, getHMMFilter, resetHMMFilter, markRiseFallTrade } from '@/lib/trading-engine';
+import { generateUnder4Over5Predictions } from '@/lib/under4over5-engine';
 import { AccountPanel } from './AccountPanel';
 import { StatsPanel } from './StatsPanel';
 import { TradeLogPanel } from './TradeLogPanel';
@@ -403,7 +404,10 @@ export const Dashboard: React.FC = () => {
       stopTrading(`Stopped: maximum of ${currentConfig.maxAutomatedTrades} automated trades reached`);
       return;
     }
-    const preds = generatePredictions(symbolsDataRef.current, currentConfig);
+    // Use Under4/Over5 engine when specialist mode is active
+    const preds = currentConfig.under4Over5Mode
+      ? generateUnder4Over5Predictions(symbolsDataRef.current, currentConfig)
+      : generatePredictions(symbolsDataRef.current, currentConfig);
     setPredictions(preds);
 
     if (preds.length === 0) {
