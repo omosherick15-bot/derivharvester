@@ -15,6 +15,7 @@ import { ControlPanel } from './ControlPanel';
 import { DigitHeatmap } from './DigitHeatmap';
 import { MarketAnalysisPanel } from './MarketAnalysisPanel';
 import { LivePricesPanel } from './LivePricesPanel';
+import { MarketScannerPanel } from './MarketScannerPanel';
 import {
   soundTradeExecuted, soundTradeWin, soundTradeLoss,
   soundHarvest, soundSessionEnd, speakWelcome,
