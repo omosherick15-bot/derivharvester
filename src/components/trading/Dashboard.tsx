@@ -6,6 +6,7 @@ import {
   getContractTypesForCategories,
 } from '@/lib/trading-types';
 import { createSymbolData, updateSymbolData, generatePredictions, getBarrierString, getHMMFilter, resetHMMFilter, markRiseFallTrade } from '@/lib/trading-engine';
+import { generateUnder4Over5Predictions } from '@/lib/under4over5-engine';
 import { AccountPanel } from './AccountPanel';
 import { StatsPanel } from './StatsPanel';
 import { TradeLogPanel } from './TradeLogPanel';
