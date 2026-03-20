@@ -117,6 +117,7 @@ export const DEFAULT_CONFIG: TradingConfig = {
   ticksWindow: 0,
   takeProfit: 0,
   stopLoss: 0,
+  under4Over5Mode: false,
 };
 
 // Correct decimal places per Deriv symbol (from actual market data)
