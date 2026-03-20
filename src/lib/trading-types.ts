@@ -123,14 +123,14 @@ export const DEFAULT_CONFIG: TradingConfig = {
 // Correct decimal places per Deriv symbol (from actual market data)
 export const SYMBOL_DECIMALS: Record<string, number> = {
   // Volatility 1s indices
-  'R_10_1S': 3,
-  'R_15_1S': 3,
-  'R_25_1S': 3,
-  'R_30_1S': 3,
-  'R_50_1S': 4,
-  'R_75_1S': 4,
-  'R_90_1S': 4,
-  'R_100_1S': 2,
+  '1HZ10V': 3,
+  '1HZ15V': 3,
+  '1HZ25V': 3,
+  '1HZ30V': 3,
+  '1HZ50V': 4,
+  '1HZ75V': 4,
+  '1HZ90V': 4,
+  '1HZ100V': 2,
   // Standard Volatility indices
   'R_10': 3,
   'R_25': 3,
