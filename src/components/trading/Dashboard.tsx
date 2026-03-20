@@ -15,6 +15,7 @@ import { ControlPanel } from './ControlPanel';
 import { DigitHeatmap } from './DigitHeatmap';
 import { MarketAnalysisPanel } from './MarketAnalysisPanel';
 import { LivePricesPanel } from './LivePricesPanel';
+import { MarketScannerPanel } from './MarketScannerPanel';
 import {
   soundTradeExecuted, soundTradeWin, soundTradeLoss,
   soundHarvest, soundSessionEnd, speakWelcome,
@@ -590,6 +591,7 @@ export const Dashboard: React.FC = () => {
         <div className="lg:col-span-5 space-y-2 md:space-y-4">
           <LivePricesPanel symbolsData={liveSymbolsData} />
           <PredictionPanel predictions={predictions} isTrading={isTrading} symbolsData={liveSymbolsData} />
+          <MarketScannerPanel symbolsData={liveSymbolsData} isTrading={isTrading} />
           {currentSymbolData && currentSymbolData.recentDigits.length >= 10 && (
             <div className="space-y-2">
               <DigitHeatmap data={currentSymbolData} />

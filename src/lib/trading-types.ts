@@ -1,12 +1,12 @@
 export const SYMBOLS_1S = [
-  { symbol: 'R_10_1S', name: 'Volatility 10 (1s) Index' },
-  { symbol: 'R_15_1S', name: 'Volatility 15 (1s) Index' },
-  { symbol: 'R_25_1S', name: 'Volatility 25 (1s) Index' },
-  { symbol: 'R_30_1S', name: 'Volatility 30 (1s) Index' },
-  { symbol: 'R_50_1S', name: 'Volatility 50 (1s) Index' },
-  { symbol: 'R_75_1S', name: 'Volatility 75 (1s) Index' },
-  { symbol: 'R_90_1S', name: 'Volatility 90 (1s) Index' },
-  { symbol: 'R_100_1S', name: 'Volatility 100 (1s) Index' },
+  { symbol: '1HZ10V', name: 'Volatility 10 (1s) Index' },
+  { symbol: '1HZ15V', name: 'Volatility 15 (1s) Index' },
+  { symbol: '1HZ25V', name: 'Volatility 25 (1s) Index' },
+  { symbol: '1HZ30V', name: 'Volatility 30 (1s) Index' },
+  { symbol: '1HZ50V', name: 'Volatility 50 (1s) Index' },
+  { symbol: '1HZ75V', name: 'Volatility 75 (1s) Index' },
+  { symbol: '1HZ90V', name: 'Volatility 90 (1s) Index' },
+  { symbol: '1HZ100V', name: 'Volatility 100 (1s) Index' },
 ];
 
 export const SYMBOLS_STANDARD = [
@@ -123,14 +123,14 @@ export const DEFAULT_CONFIG: TradingConfig = {
 // Correct decimal places per Deriv symbol (from actual market data)
 export const SYMBOL_DECIMALS: Record<string, number> = {
   // Volatility 1s indices
-  'R_10_1S': 3,
-  'R_15_1S': 3,
-  'R_25_1S': 3,
-  'R_30_1S': 3,
-  'R_50_1S': 4,
-  'R_75_1S': 4,
-  'R_90_1S': 4,
-  'R_100_1S': 2,
+  '1HZ10V': 3,
+  '1HZ15V': 3,
+  '1HZ25V': 3,
+  '1HZ30V': 3,
+  '1HZ50V': 4,
+  '1HZ75V': 4,
+  '1HZ90V': 4,
+  '1HZ100V': 2,
   // Standard Volatility indices
   'R_10': 3,
   'R_25': 3,

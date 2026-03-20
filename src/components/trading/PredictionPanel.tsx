@@ -18,7 +18,7 @@ export const PredictionPanel: React.FC<Props> = ({ predictions, isTrading, symbo
           {isTrading ? 'Scanning for statistical edge...' : 'Start trading to see predictions'}
         </p>
       ) : (
-        <div className="space-y-1.5 max-h-64 overflow-y-auto scrollbar-thin">
+        <div className="space-y-1.5">
           {predictions.map((pred, i) => (
             <div
               key={`${pred.symbol}-${pred.contractType}-${pred.digit}-${i}`}
